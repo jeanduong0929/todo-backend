@@ -54,7 +54,8 @@ public class UserService {
    * @return True if the username is valid, false otherwise.
    */
   public boolean isValidUsername(String username) {
-    return username.matches("[a-zA-Z0-9]{3,20}");
+    return username.matches(
+        "^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$");
   }
 
   /**
@@ -82,7 +83,7 @@ public class UserService {
    */
   public boolean isValiddPassword(String password) {
     // Password must be between 8 and 20 characters long
-    return password.matches("[a-zA-Z0-9]{8,20}");
+    return password.matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$");
   }
 
   /**

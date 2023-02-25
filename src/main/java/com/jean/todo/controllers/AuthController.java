@@ -41,7 +41,7 @@ public class AuthController {
                                     @RequestBody NewRegisterRequest request) {
     if (!userService.isValidUsername(request.getUsername())) {
       throw new IllegalArgumentException(
-          "Invalid username. Must be between 3 and 20 characters.");
+          "Invalid username. Must be between 8 and 20 characters.");
     }
 
     if (!userService.isUniqueUsername(request.getUsername())) {
@@ -76,5 +76,20 @@ public class AuthController {
     response.put("timestamp", new Date(System.currentTimeMillis()));
     response.put("message", e.getMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+  }
+
+  /**
+   * Handles ResourceConflictExceptions.
+   *
+   * @param e The ResourceConflictException.
+   * @return A map containing a timestamp and a message.
+   */
+  @ExceptionHandler(ResourceConflictException.class)
+  public ResponseEntity<Map<String, Object>>
+  handleResourceConflictException(ResourceConflictException e) {
+    Map<String, Object> response = new LinkedHashMap<>();
+    response.put("timestamp", new Date(System.currentTimeMillis()));
+    response.put("message", e.getMessage());
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
   }
 }
