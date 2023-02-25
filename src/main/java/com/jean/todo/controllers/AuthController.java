@@ -1,8 +1,11 @@
 package com.jean.todo.controllers;
 
 import com.jean.todo.dtos.requests.NewRegisterRequest;
+import com.jean.todo.dtos.requests.NewloginRequest;
+import com.jean.todo.dtos.responses.Principal;
 import com.jean.todo.services.UserService;
 import com.jean.todo.utils.custom_exceptions.ResourceConflictException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.sql.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -61,6 +64,13 @@ public class AuthController {
 
     userService.save(request);
     return ResponseEntity.ok("User created successfully.");
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<Principal> login(@RequestBody NewloginRequest request,
+                                         HttpServletRequest httpReq) {
+
+    return ResponseEntity.status(HttpStatus.OK).body(null);
   }
 
   /**

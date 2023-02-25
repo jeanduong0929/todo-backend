@@ -1,6 +1,8 @@
 package com.jean.todo.services;
 
 import com.jean.todo.dtos.requests.NewRegisterRequest;
+import com.jean.todo.dtos.requests.NewloginRequest;
+import com.jean.todo.dtos.responses.Principal;
 import com.jean.todo.entities.User;
 import com.jean.todo.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -14,7 +16,7 @@ public class UserService {
   private final SecurityService securityService;
 
   public UserService(UserRepository userRepository,
-                     SecurityService securityService) {
+      SecurityService securityService) {
     this.userRepository = userRepository;
     this.securityService = securityService;
   }
@@ -22,6 +24,7 @@ public class UserService {
   /**
    * Creates a new user.
    *
+   * <p>
    * This method creates a new user from the provided request. It first
    * generates a salt, then hashes the user's password using the salt. The
    * hashed password and salt are then used to create a new user object.
@@ -33,8 +36,7 @@ public class UserService {
   public User save(NewRegisterRequest request) {
     try {
       byte[] salt = securityService.generateSalt();
-      byte[] password =
-          securityService.hashingMethod(request.getPassword1(), salt);
+      byte[] password = securityService.hashingMethod(request.getPassword1(), salt);
 
       User createdUser = new User(request, password, salt);
       return userRepository.save(createdUser);
@@ -44,11 +46,16 @@ public class UserService {
     return null;
   }
 
+  public Principal login(NewloginRequest request) {
+    return null;
+  }
+
   /**
    * Validates a username.
    *
-   * A username must be between 3 and 20 characters long, and can only contain
-   * letters and numbers.
+   * <p>
+   * A username must be between 3 and 20 characters long, and can only
+   * contain letters and numbers.
    *
    * @param username The username to validate.
    * @return True if the username is valid, false otherwise.
@@ -61,6 +68,7 @@ public class UserService {
   /**
    * Checks if a username is unique.
    *
+   * <p>
    * A username is considered unique if it is not already in use by another
    * user. This method checks the database to see if a user with the provided
    * username exists.
@@ -75,8 +83,9 @@ public class UserService {
   /**
    * Validates a password.
    *
-   * A password must be between 8 and 20 characters long, and can only Contain
-   * letters and numbers.
+   * <p>
+   * A password must be between 8 and 20 characters long, and can only
+   * Contain letters and numbers.
    *
    * @param password The password to validate.
    * @return True if the password is valid, false otherwise.
