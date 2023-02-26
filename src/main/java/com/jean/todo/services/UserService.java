@@ -37,7 +37,6 @@ public class UserService {
     try {
       byte[] salt = securityService.generateSalt();
       byte[] password = securityService.hashingMethod(request.getPassword1(), salt);
-
       User createdUser = new User(request, password, salt);
       return userRepository.save(createdUser);
     } catch (NoSuchAlgorithmException e) {
@@ -46,14 +45,31 @@ public class UserService {
     return null;
   }
 
+  /**
+   * Logs a user in.
+   * 
+   * 
+   * @param request
+   * @return
+   */
   public Principal login(NewloginRequest request) {
-    return null;
+    User foundUser = userRepository.findByUsername(request.getUsername());
+    if (foundUser != null) {
+      try {
+        byte[] hashedPassword = securityService.hashingMethod(request.getPassword(), foundUser.getSalt());
+        if (securityService.isMatchingPassword(hashedPassword, foundUser.getPassword())) {
+          return new Principal(foundUser);
+        }
+      } catch (NoSuchAlgorithmException e) {
+        e.printStackTrace();
+      }
+    }
+    throw new IllegalArgumentException("Invalid username or password.");
   }
 
   /**
    * Validates a username.
    *
-   * <p>
    * A username must be between 3 and 20 characters long, and can only
    * contain letters and numbers.
    *
@@ -61,8 +77,7 @@ public class UserService {
    * @return True if the username is valid, false otherwise.
    */
   public boolean isValidUsername(String username) {
-    return username.matches(
-        "^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$");
+    return username.matches("^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$");
   }
 
   /**
@@ -83,7 +98,6 @@ public class UserService {
   /**
    * Validates a password.
    *
-   * <p>
    * A password must be between 8 and 20 characters long, and can only
    * Contain letters and numbers.
    *

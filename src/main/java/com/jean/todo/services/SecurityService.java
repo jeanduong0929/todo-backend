@@ -39,4 +39,16 @@ public class SecurityService {
     md.update(salt);
     return md.digest(password.getBytes(StandardCharsets.UTF_8));
   }
+
+  /**
+   * Compares two byte arrays to determine if they match.
+   *
+   * @param actualPassword   The actual password entered by the user.
+   * @param expectedPassword The expected password stored in a database or other
+   *                         secure storage system.
+   * @return Returns true if the two byte arrays match, or false if they don't.
+   */
+  public boolean isMatchingPassword(byte[] actualPassword, byte[] expectedPassword) {
+    return MessageDigest.isEqual(actualPassword, expectedPassword);
+  }
 }
