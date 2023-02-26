@@ -6,7 +6,6 @@ import com.jean.todo.utils.custom_exceptions.ResourceConflictException;
 import java.sql.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -37,8 +36,7 @@ public class AuthController {
    * @return A response entity containing a message.
    */
   @PostMapping("/register")
-  public ResponseEntity<?> register(@Validated
-                                    @RequestBody NewRegisterRequest request) {
+  public ResponseEntity<?> register(@Validated @RequestBody NewRegisterRequest request) {
     if (!userService.isValidUsername(request.getUsername())) {
       throw new IllegalArgumentException(
           "Invalid username. Must be between 8 and 20 characters.");
@@ -51,8 +49,8 @@ public class AuthController {
     if (!userService.isValiddPassword(request.getPassword1())) {
       throw new IllegalArgumentException(
           "Invalid password. Must be between 8 "
-          + "and 20 characters, and contain at least one number, one "
-          + "uppercase letter, and one lowercase letter");
+              + "and 20 characters, and contain at least one number, one "
+              + "uppercase letter, and one lowercase letter");
     }
 
     if (!request.getPassword1().equals(request.getPassword2())) {
@@ -70,8 +68,7 @@ public class AuthController {
    * @return A map containing a timestamp and a message.
    */
   @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<Map<String, Object>>
-  handleIllegalArgumentException(IllegalArgumentException e) {
+  public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException e) {
     Map<String, Object> response = new LinkedHashMap<>();
     response.put("timestamp", new Date(System.currentTimeMillis()));
     response.put("message", e.getMessage());
@@ -85,8 +82,7 @@ public class AuthController {
    * @return A map containing a timestamp and a message.
    */
   @ExceptionHandler(ResourceConflictException.class)
-  public ResponseEntity<Map<String, Object>>
-  handleResourceConflictException(ResourceConflictException e) {
+  public ResponseEntity<Map<String, Object>> handleResourceConflictException(ResourceConflictException e) {
     Map<String, Object> response = new LinkedHashMap<>();
     response.put("timestamp", new Date(System.currentTimeMillis()));
     response.put("message", e.getMessage());
