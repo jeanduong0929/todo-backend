@@ -1,6 +1,9 @@
 package com.jean.todo.controllers;
 
 import com.jean.todo.dtos.requests.NewRegisterRequest;
+import com.jean.todo.dtos.requests.NewloginRequest;
+import com.jean.todo.dtos.responses.Principal;
+import com.jean.todo.services.TokenService;
 import com.jean.todo.services.UserService;
 import com.jean.todo.utils.custom_exceptions.ResourceConflictException;
 import java.sql.Date;
@@ -19,9 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
   private final UserService userService;
+  private final TokenService tokenService;
 
-  public AuthController(UserService userService) {
+  public AuthController(UserService userService, TokenService tokenService) {
     this.userService = userService;
+    this.tokenService = tokenService;
   }
 
   /**
@@ -59,6 +64,21 @@ public class AuthController {
 
     userService.save(request);
     return ResponseEntity.ok("User created successfully.");
+  }
+
+  /**
+   * Authenticates a user and generates a new access token.
+   *
+   * @param request The request object containing the user's login credentials.
+   * @return A ResponseEntity containing a Principal object representing the
+   *         authenticated user, with a new access token.
+   */
+  @PostMapping("/login")
+  public ResponseEntity<Principal> login(@RequestBody NewloginRequest request) {
+    Principal principal = userService.login(request);
+    String token = tokenService.generateToken(principal);
+    principal.setToken(token);
+    return ResponseEntity.status(HttpStatus.OK).body(principal);
   }
 
   /**
