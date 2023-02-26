@@ -1,12 +1,14 @@
 package com.jean.todo.controllers;
 
 import com.jean.todo.dtos.requests.NewRegisterRequest;
+import com.jean.todo.dtos.requests.NewloginRequest;
+import com.jean.todo.dtos.responses.Principal;
+import com.jean.todo.services.TokenService;
 import com.jean.todo.services.UserService;
 import com.jean.todo.utils.custom_exceptions.ResourceConflictException;
 import java.sql.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,9 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
   private final UserService userService;
+  private final TokenService tokenService;
 
-  public AuthController(UserService userService) {
+  public AuthController(UserService userService, TokenService tokenService) {
     this.userService = userService;
+    this.tokenService = tokenService;
   }
 
   /**
@@ -37,8 +41,7 @@ public class AuthController {
    * @return A response entity containing a message.
    */
   @PostMapping("/register")
-  public ResponseEntity<?> register(@Validated
-                                    @RequestBody NewRegisterRequest request) {
+  public ResponseEntity<?> register(@Validated @RequestBody NewRegisterRequest request) {
     if (!userService.isValidUsername(request.getUsername())) {
       throw new IllegalArgumentException(
           "Invalid username. Must be between 8 and 20 characters.");
@@ -51,8 +54,8 @@ public class AuthController {
     if (!userService.isValiddPassword(request.getPassword1())) {
       throw new IllegalArgumentException(
           "Invalid password. Must be between 8 "
-          + "and 20 characters, and contain at least one number, one "
-          + "uppercase letter, and one lowercase letter");
+              + "and 20 characters, and contain at least one number, one "
+              + "uppercase letter, and one lowercase letter");
     }
 
     if (!request.getPassword1().equals(request.getPassword2())) {
@@ -64,14 +67,28 @@ public class AuthController {
   }
 
   /**
+   * Authenticates a user and generates a new access token.
+   *
+   * @param request The request object containing the user's login credentials.
+   * @return A ResponseEntity containing a Principal object representing the
+   *         authenticated user, with a new access token.
+   */
+  @PostMapping("/login")
+  public ResponseEntity<Principal> login(@RequestBody NewloginRequest request) {
+    Principal principal = userService.login(request);
+    String token = tokenService.generateToken(principal);
+    principal.setToken(token);
+    return ResponseEntity.status(HttpStatus.OK).body(principal);
+  }
+
+  /**
    * Handles IllegalArgumentExceptions.
    *
    * @param e The IllegalArgumentException.
    * @return A map containing a timestamp and a message.
    */
   @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<Map<String, Object>>
-  handleIllegalArgumentException(IllegalArgumentException e) {
+  public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException e) {
     Map<String, Object> response = new LinkedHashMap<>();
     response.put("timestamp", new Date(System.currentTimeMillis()));
     response.put("message", e.getMessage());
@@ -85,8 +102,7 @@ public class AuthController {
    * @return A map containing a timestamp and a message.
    */
   @ExceptionHandler(ResourceConflictException.class)
-  public ResponseEntity<Map<String, Object>>
-  handleResourceConflictException(ResourceConflictException e) {
+  public ResponseEntity<Map<String, Object>> handleResourceConflictException(ResourceConflictException e) {
     Map<String, Object> response = new LinkedHashMap<>();
     response.put("timestamp", new Date(System.currentTimeMillis()));
     response.put("message", e.getMessage());
